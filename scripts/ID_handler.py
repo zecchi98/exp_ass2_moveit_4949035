@@ -991,6 +991,8 @@ def move_gripper(gripper_goal):
 def callback_oracle_hint(req):
   global hypothesis
   # int32 ID;  string key; string value
+  if(req.value=='-1'):
+      return
   hypothesis[req.ID].set_hypo_code(req.ID)
   if req.key=="where":
     hypothesis[req.ID].add_place(req.value)

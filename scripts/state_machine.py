@@ -50,7 +50,7 @@ class my_rosplan_class():
     self.parse_plan_client=rospy.ServiceProxy('/rosplan_parsing_interface/parse_plan',Empty)
     self.cancel_dispatch_client=rospy.ServiceProxy('/rosplan_plan_dispatcher/cancel_dispatch',Empty)
     self.dispatch_client=rospy.ServiceProxy('/rosplan_plan_dispatcher/dispatch_plan',DispatchService)
-    self.debug=True
+    self.debug=False
   def clear_plan(self):
     self.clear_plan()
   def add_GOAL_predicate_single_param(self,predicate_name,key,value,bool):
@@ -152,6 +152,59 @@ def callback_service_hints_received_and_complete(req):
         response.data[i]=1
   print(response)
   return response
+def plan_a_test():
+    rosplan_library.clear_plan()
+    rosplan_library.add_INSTANCE("waypoint","wp0")
+    rosplan_library.add_INSTANCE("waypoint","wp1")
+    rosplan_library.add_INSTANCE("waypoint","wp2")
+    rosplan_library.add_INSTANCE("waypoint","wp3")
+    rosplan_library.add_INSTANCE("waypoint","wp4")
+
+    rosplan_library.add_FACT_predicate_single_param("hint_taken","waypoint","wp0",True)
+    rosplan_library.add_FACT_predicate_single_param("hint_taken","waypoint","wp1",True)
+    rosplan_library.add_FACT_predicate_single_param("hint_taken","waypoint","wp2",True)
+    rosplan_library.add_FACT_predicate_single_param("hint_taken","waypoint","wp3",True)
+    rosplan_library.add_FACT_predicate_single_param("hint_taken","waypoint","wp4",True)
+
+    rosplan_library.add_FACT_predicate_single_param("is_home","waypoint","wp0",True)
+
+    rosplan_library.add_FACT_predicate_single_param("robot_at","waypoint","wp4",True)
+
+    rosplan_library.add_FACT_predicate_NO_param("hps_checked",True)
+
+    rosplan_library.add_GOAL_predicate_NO_param("hps_tested",True)
+
+    rosplan_library.generate_the_problem_and_plan_and_parse()
+    result=rosplan_library.dispatch_client()
+    print(result)
+
+
+def replan_until_you_have_a_complete_hint():
+    all_hints_taken=False
+    while(not all_hints_taken):
+        rosplan_library.clear_plan()
+        rosplan_library.add_INSTANCE("waypoint","wp0")
+        rosplan_library.add_INSTANCE("waypoint","wp1")
+        #rosplan_library.add_INSTANCE("waypoint","wp2")
+        rosplan_library.add_INSTANCE("waypoint","wp3")
+        #rosplan_library.add_INSTANCE("waypoint","wp4")
+
+        rosplan_library.add_FACT_predicate_single_param("is_home","waypoint","wp0",True)
+        rosplan_library.add_FACT_predicate_single_param("hint_taken","waypoint","wp0",True)
+        rosplan_library.add_FACT_predicate_single_param("robot_at","waypoint","wp0",True)
+        rosplan_library.add_GOAL_predicate_NO_param("hps_checked",True)
+
+        rosplan_library.generate_the_problem_and_plan_and_parse()
+        result=rosplan_library.dispatch_client()
+        print(result)
+
+        all_hints_taken = rospy.get_param('hint_to_be_tested')
+        if(all_hints_taken):
+            print("Need to test!")
+
+
+
+
 
 def define_all_initial_functions():
     global rosplan_library
@@ -159,44 +212,16 @@ def define_all_initial_functions():
     bool_exit=False
 
 
+    all_hints_taken = rospy.set_param('hint_to_be_tested',True)
     rosplan_library=my_rosplan_class()
-    rosplan_library.generate_the_problem_and_plan_and_parse()
-    result=rosplan_library.dispatch_client()
-    print(result)
-    print("FINITO, ORA LO FACCIO RIPARTIRE")
-
-    rosplan_library.cancel_dispatch()
-    rosplan_library.clear_plan()
-
-    rosplan_library.add_INSTANCE("waypoint","wp0")
-    rosplan_library.add_INSTANCE("waypoint","wp1")
-    #rosplan_library.add_INSTANCE("waypoint","wp3")
-    #rosplan_library.add_INSTANCE("waypoint","wp4")
-
-    rosplan_library.add_FACT_predicate_single_param("hint_taken","waypoint","wp0",True)
-    
-    rosplan_library.add_FACT_predicate_single_param("robot_at","waypoint","wp0",True)
-
-    #Let's set the goal
-    rosplan_library.add_GOAL_predicate_NO_param("HP_tested",True)
-
-
-
-
-    rosplan_library.generate_the_problem_and_plan_and_parse()
-    rosplan_library.generate_the_problem_and_plan_and_parse()
-    result=rosplan_library.dispatch_client()
-    print(result)
-
-
-    rosplan_library.generate_the_problem_and_plan_and_parse()
-    rosplan_library.generate_the_problem_and_plan_and_parse()
-    result=rosplan_library.dispatch_client()
-    print(result)
-
-    
+    all_hints_taken=False
+    you_win=False
+    #prova()
+    while(not you_win):
+        replan_until_you_have_a_complete_hint()
+        plan_a_test()
 def prova():
-    nul=0
+    plan_a_test()
 
 def main():
   define_all_initial_functions()
