@@ -96,11 +96,6 @@
 	
 
 
-<node name="goToPoint" pkg="rt2_ass1_ros1" type ="go_to_point_action.py" />
-<node name="robot_control" pkg="exp_ass2_moveit_4949035" type="robot_control.py"/>
-<!--node name="id_handler" pkg="exp_ass2_moveit_4949035" type="ID_handler.py"/-->
-<node name="simulation_node" pkg ="exp_ass2_moveit_4949035" type="simulation_node" output="screen" />
-
   
 
 </launch>

@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<launch>
+
+<include file="$(find exp_ass2_moveit_4949035)/launch/my_launch/my_launch_file_moveit.launch" />
+<include file="$(find exp_ass2_moveit_4949035)/launch/my_launch/my_launch_file_pddl.launch" />
+
+<node name="simulation_node" pkg ="exp_ass2_moveit_4949035" type="simulation_node" output="screen" />
+<node name="goToPoint" pkg="rt2_ass1_ros1" type ="go_to_point_action.py" />
+<node name="robot_control" pkg="exp_ass2_moveit_4949035" type="robot_control.py"/>
+
+</launch>

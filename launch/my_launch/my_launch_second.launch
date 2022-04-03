@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<launch>
+
+<node name="id_handler" pkg="exp_ass2_moveit_4949035" type="ID_handler.py" respawn="false" output="screen"/>
+<node name="state_machine" pkg="exp_ass2_moveit_4949035" type="state_machine.py" respawn="false" output="screen"/>
+</launch>

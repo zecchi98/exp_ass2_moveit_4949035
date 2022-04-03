@@ -51,7 +51,7 @@ void oracleCallback(const gazebo_msgs::LinkStates::ConstPtr& msg)
 				if ((distanza<0.25) && ((lastmarkx !=markx[j]) || (lastmarky != marky[j]))){
 				
 				exp_ass2_moveit_4949035::ErlOracle oracle_msg;
-        oracle_msg.ID = rand() % 2;
+        oracle_msg.ID = rand() % 6;
 				if(rand()%4==1){
 					int a = rand()%5;
 					if(a==0){

@@ -1,6 +1,18 @@
-#!/usr/bin/env python3
-#fold all: ctrl + k + 0
-#unfold all: ctrl + k + j
+#!/usr/bin/env python
+## @package exp_ass2_moveit_4949035
+# \file state_machine.py
+# \brief This node is used as a state machine. In particular it will control the pddl interface by planning and requesting what's needed.
+# \author Federico Zecchi
+# \version 0.1
+# \date 30/03/22
+#
+# \details
+#
+# Client : <BR>
+# [/rosplan_knowledge_base/clear][/rosplan_knowledge_base/update][/rosplan_problem_interface/problem_generation_server]
+# [/rosplan_planner_interface/planning_server][/rosplan_parsing_interface/parse_plan][/rosplan_plan_dispatcher/cancel_dispatch]
+# [/rosplan_plan_dispatcher/dispatch_plan]
+#
 import copy
 import math
 import sys
@@ -28,12 +40,18 @@ from std_srvs.srv import Empty
 from rosplan_knowledge_msgs.srv import *
 
 from rosplan_dispatch_msgs.srv import DispatchService
-flagMiddlePanelCreated=False
-bool_exit=False
 
 class my_rosplan_class():
+  ##
+  #\class my_rosplan_class
+  #\brief This class has been developed in order to interface with pddl. From this class the problem file can be modified,
+  #it is possible to clear a plan or plan a new one
   def __init__(self):
+    ##
+    #\brief In this function some clients initialization will be executed and we will wait for service to come up.
     super(my_rosplan_class, self).__init__()
+
+    #Here we wait for services to be active
     print("Waiting for services")
     rospy.wait_for_service("rosplan_knowledge_base/update")
     rospy.wait_for_service("rosplan_knowledge_base/clear")
@@ -43,6 +61,8 @@ class my_rosplan_class():
     rospy.wait_for_service("rosplan_plan_dispatcher/cancel_dispatch")
     rospy.wait_for_service("rosplan_plan_dispatcher/dispatch_plan")
     print("All services ready")
+
+    #Here we initilize clients
     self.clear_plan=rospy.ServiceProxy('/rosplan_knowledge_base/clear',Empty)
     self.update_the_plan=rospy.ServiceProxy('/rosplan_knowledge_base/update',KnowledgeUpdateService)
     self.generate_problem_client=rospy.ServiceProxy('/rosplan_problem_interface/problem_generation_server',Empty)
@@ -52,10 +72,18 @@ class my_rosplan_class():
     self.dispatch_client=rospy.ServiceProxy('/rosplan_plan_dispatcher/dispatch_plan',DispatchService)
     self.debug=False
   def clear_plan(self):
+    ##
+    #\brief We call the client to clear a plan
     self.clear_plan()
   def add_GOAL_predicate_single_param(self,predicate_name,key,value,bool):
-    #key is the type while value is the name of the variable
+    ##
+    #\brief We use this function to add as a goal one predicate of a single param.
+    #predicate_name is the name of the predicate
+    #key is the type of the param (for example waypoint)
+    #value is the name of the param variable (for example wp1)
     #bool is used to set to True or False the goal
+    
+    #Here we initialize the message and we call the client
     req=KnowledgeUpdateServiceRequest()
     req.knowledge.is_negative=not(bool)
     req.update_type=1
@@ -69,8 +97,12 @@ class my_rosplan_class():
     if self.debug==True:
       print(result)
   def add_GOAL_predicate_NO_param(self,predicate_name,bool):
-    #key is the type while value is the name of the variable
+    ##
+    #\brief We use this function to add as a goal one predicate without param.
+    #predicate_name is the name of the predicate
     #bool is used to set to True or False the goal
+    
+    #Here we initialize the message and we call the client
     req=KnowledgeUpdateServiceRequest()
     req.knowledge.is_negative=not(bool)
     req.update_type=1
@@ -80,8 +112,12 @@ class my_rosplan_class():
     if self.debug==True:
       print(result)
   def add_INSTANCE(self,type,name):
-    #key is the type while value is the name of the variable
-    #bool is used to set to True or False the goal
+    ##
+    #\brief We use this function to add an instance of a variable. For example to declare that wp1 as a waypoint
+    #type is the type of the param (for example waypoint)
+    #name is the name of the param variable (for example wp1)
+    
+    #Here we initialize the message and we call the client
     req=KnowledgeUpdateServiceRequest()
 
     req.update_type=0
@@ -92,8 +128,14 @@ class my_rosplan_class():
     if self.debug==True:
       print(result)
   def add_FACT_predicate_single_param(self,predicate_name,key,value,bool):
-    #key is the type while value is the name of the variable
+    ##
+    #\brief We use this function to initialize a predicate with a value. In this case it is a single param predicate
+    #predicate_name is the name of the predicate
+    #key is the type of the param (for example waypoint)
+    #value is the name of the param variable (for example wp1)
     #bool is used to set to True or False the goal
+    
+    #Here we initialize the message and we call the client
     req=KnowledgeUpdateServiceRequest()
     req.knowledge.is_negative=not(bool)
     req.update_type=0
@@ -107,8 +149,12 @@ class my_rosplan_class():
     if self.debug==True:
       print(result)
   def add_FACT_predicate_NO_param(self,predicate_name,bool):
-    #key is the type while value is the name of the variable
+    ##
+    #\brief We use this function to initialize a predicate with a value. In this case it is a no param predicate
+    #predicate_name is the name of the predicate
     #bool is used to set to True or False the goal
+    
+    #Here we initialize the message and we call the client
     req=KnowledgeUpdateServiceRequest()
     req.knowledge.is_negative=not(bool)
     req.update_type=0
@@ -118,123 +164,148 @@ class my_rosplan_class():
     if self.debug==True:
       print(result)
   def generate_the_problem_and_plan_and_parse(self):
+    ##
+    #\brief This function is used to call the right clients to generate problem, plan and parse the plan
     self.generate_problem_client()
     self.planning_server_client()
     self.parse_plan_client()
   def cancel_dispatch(self):
+    ##
+    #\brief This function will call the right client to cancel a plan
     self.cancel_dispatch_client()
   def dispatch_plan(self):
+    ##
+    #\brief This function will dispatch a plan
     return self.dispatch_client()
-
-
-def callback_oracle_hint(req):
-  global hypothesis
-  # int32 ID;  string key; string value
-  hypothesis[req.ID].set_hypo_code(req.ID)
-  if req.key=="where":
-    hypothesis[req.ID].add_place(req.value)
-
-  if req.key=="who":
-    hypothesis[req.ID].add_person(req.value)
-
-  if req.key=="what":
-    hypothesis[req.ID].add_weapon(req.value)
-  print("hint received")
-  hypothesis[req.ID].print_data()
-def callback_service_hints_received_and_complete(req):
-  response=comunicationResponse()
-  response.response="ok"
-  response.success=True
-  response.data=[0,0,0,0,0,0]
-  if req.msg1=="hints_complete":
-    for i in range(0,6):
-      if(hypothesis[i].check_complete_and_consistent()):
-        response.data[i]=1
-  print(response)
-  return response
 def plan_a_test():
+    ##
+    #\brief We will enter in this function if and only if there is a new id to be checked.
+    #We will ask through pddl to go to the center of the map and check if we have won.
+
+    #We will check our position
+    robot_at = rospy.get_param('/robot_at')
+    robot_at="wp"+str(robot_at)
+
+    #Clear the old plan
     rosplan_library.clear_plan()
+
+    #Adding waypoint instances
     rosplan_library.add_INSTANCE("waypoint","wp0")
     rosplan_library.add_INSTANCE("waypoint","wp1")
     rosplan_library.add_INSTANCE("waypoint","wp2")
     rosplan_library.add_INSTANCE("waypoint","wp3")
     rosplan_library.add_INSTANCE("waypoint","wp4")
 
+    #I set all hint as taken
     rosplan_library.add_FACT_predicate_single_param("hint_taken","waypoint","wp0",True)
     rosplan_library.add_FACT_predicate_single_param("hint_taken","waypoint","wp1",True)
     rosplan_library.add_FACT_predicate_single_param("hint_taken","waypoint","wp2",True)
     rosplan_library.add_FACT_predicate_single_param("hint_taken","waypoint","wp3",True)
     rosplan_library.add_FACT_predicate_single_param("hint_taken","waypoint","wp4",True)
 
+    
+    #I set waypoint wp0 as the home waypoint 
     rosplan_library.add_FACT_predicate_single_param("is_home","waypoint","wp0",True)
 
-    rosplan_library.add_FACT_predicate_single_param("robot_at","waypoint","wp4",True)
 
+        #I set the robot position in the right waypoint
+    rosplan_library.add_FACT_predicate_single_param("robot_at","waypoint",robot_at,True)
+
+
+    #I know that I have already taken this hint so i consequently add this information inside the pddl 
+    rosplan_library.add_FACT_predicate_single_param("hp_checked","waypoint","wp0",True)
+    rosplan_library.add_FACT_predicate_single_param("hp_checked","waypoint",robot_at,True)
+
+    #I will consider that all hps are already checked
     rosplan_library.add_FACT_predicate_NO_param("hps_checked",True)
 
+    #I will ask the algorithm to test the hps
     rosplan_library.add_GOAL_predicate_NO_param("hps_tested",True)
 
+
+        
+    #Generete and parse the pddl
     rosplan_library.generate_the_problem_and_plan_and_parse()
+
+    #Asking for the execution
     result=rosplan_library.dispatch_client()
     print(result)
-
-
 def replan_until_you_have_a_complete_hint():
-    all_hints_taken=False
-    while(not all_hints_taken):
+    ##
+    #\brief This function will oblidge the robot to visit and take all the hints. 
+    # Once the motion is completed if there is a new complete id it will test it.
+    # It can also happen that the plan get interrupted by another node if there is the need to test 
+
+    need_to_test=False
+    
+    #It will loop until there is the need to test 
+    while(not need_to_test):
+
+        #The plan gets deleted
         rosplan_library.clear_plan()
+
+        #Here waypoints get initialized as instances inside the problem.pddl
         rosplan_library.add_INSTANCE("waypoint","wp0")
         rosplan_library.add_INSTANCE("waypoint","wp1")
-        #rosplan_library.add_INSTANCE("waypoint","wp2")
+        rosplan_library.add_INSTANCE("waypoint","wp2")
         rosplan_library.add_INSTANCE("waypoint","wp3")
-        #rosplan_library.add_INSTANCE("waypoint","wp4")
+        rosplan_library.add_INSTANCE("waypoint","wp4")
 
+        #Here I receive which is the robot position in order to set it correctly
+        robot_at = rospy.get_param('/robot_at')
+        robot_at="wp"+str(robot_at)
+
+        #I set waypoint wp0 as the home waypoint 
         rosplan_library.add_FACT_predicate_single_param("is_home","waypoint","wp0",True)
+
+        #I set the hint of waypoint wp0 as taken and checked due to there is no hint to be taken in that position
         rosplan_library.add_FACT_predicate_single_param("hint_taken","waypoint","wp0",True)
-        rosplan_library.add_FACT_predicate_single_param("robot_at","waypoint","wp0",True)
+        rosplan_library.add_FACT_predicate_single_param("hp_checked","waypoint","wp0",True)
+
+        #I set the robot position in the right waypoint
+        rosplan_library.add_FACT_predicate_single_param("robot_at","waypoint",robot_at,True)
+
+        #I know that I have already taken this hint so i consequently add this information inside the pddl 
+        rosplan_library.add_FACT_predicate_single_param("hp_checked","waypoint",robot_at,True)
+        rosplan_library.add_FACT_predicate_single_param("hint_taken","waypoint",robot_at,True)
+
+        #I will ask as goal that all the hps need to be checked. This means that it will take all the hints, and continsly check if there is a new complete id
         rosplan_library.add_GOAL_predicate_NO_param("hps_checked",True)
 
+        #Generete and parse the pddl
         rosplan_library.generate_the_problem_and_plan_and_parse()
+
+        #Asking for the execution
         result=rosplan_library.dispatch_client()
         print(result)
 
-        all_hints_taken = rospy.get_param('hint_to_be_tested')
-        if(all_hints_taken):
+        #Here I will check if there is the need to test
+        need_to_test = rospy.get_param('/hint_to_be_tested')
+        if(need_to_test):
             print("Need to test!")
-
-
-
-
-
-def define_all_initial_functions():
-    global rosplan_library
-    rospy.init_node('state_machine', anonymous=True)
-    bool_exit=False
-
-
-    all_hints_taken = rospy.set_param('hint_to_be_tested',True)
-    rosplan_library=my_rosplan_class()
-    all_hints_taken=False
-    you_win=False
-    #prova()
-    while(not you_win):
-        replan_until_you_have_a_complete_hint()
-        plan_a_test()
-def prova():
-    plan_a_test()
-
+            time.sleep(1)
 def main():
-  define_all_initial_functions()
-  try:
-    while (not rospy.core.is_shutdown()) and (not bool_exit):
-        rospy.rostime.wallsleep(0.5)
-        #rospy.spin()
-  except rospy.ROSInterruptException:
-    return
-  except KeyboardInterrupt:
-    return
+  ##
+  #\brief This is the main, here there will be initialization and it will be executed a spin()
+  global rosplan_library
 
-  except bool_exit==True:
-      return
+  #Node initialization
+  rospy.init_node('state_machine', anonymous=True)
+  
+  #Param used to comunicate and close other nodes
+  all_hints_taken = rospy.set_param('/hint_to_be_tested',False)
+  
+  #Initialization of the library
+  rosplan_library=my_rosplan_class()
+  
+  you_win=False
+
+  #Until you have win we will continue to move around and do test
+  while(not you_win):
+
+    replan_until_you_have_a_complete_hint()
+    plan_a_test()
+    you_win = rospy.get_param('/you_win')
+
 if __name__ == '__main__':
   main()
