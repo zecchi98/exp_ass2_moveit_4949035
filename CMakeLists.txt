@@ -48,7 +48,7 @@ include
    ${catkin_LIBRARIES}
  )
 
-catkin_install_python(PROGRAMS scripts/robot_control.py scripts/ID_handler.py
+catkin_install_python(PROGRAMS scripts/robot_control.py scripts/ID_handler.py scripts/state_machine.py
 DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

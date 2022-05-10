@@ -1,5 +1,20 @@
 # exp_ass2_moveit_4949035
 
+# How to build the project
+
+1) Installa i seguenti pacchetti:
+
+    git clone https://github.com/zecchi98/rt2_ass1_ros1.git
+    git clone https://github.com/zecchi98/exp_ass2_moveit_4949035.git
+
+2) Esegui catkin_make
+
+3) Se qualche pacchetto moveit è mancante procedi come segue:
+    sudo apt update
+    sudo apt install ros-noetic-moveit
+
+# How to run the project
+
 # PDDL DOMAIN
 
 Here i will explain which is the main structure of the pddl domain. For more information the domain.pddl has been commented.
