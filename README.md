@@ -34,7 +34,7 @@ In the second window launch :
  2)state_machine node, which will correctly handle all the pddls files
 
 # Component diagram
-The component diagram here below 
+The component diagram here below explains how all the node comunicate with each other, for each connection the topic they use has been specified
 ![component_diagram](https://user-images.githubusercontent.com/78590047/168242991-2aa84b73-a066-41ad-b9cf-307ef4492d22.png)
 
 
