@@ -12,9 +12,6 @@
 # Subscribes to: <BR>
 # [/oracle_hint]
 #
-# Client : <BR>
-# [/oracle_hint]
-#
 # Service : <BR>
 # [/hints_received_and_complete]
 #
