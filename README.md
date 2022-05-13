@@ -33,6 +33,10 @@ In the second window launch :
  1)id_handler node, which will handle and save all the ids found.
  2)state_machine node, which will correctly handle all the pddls files
 
+# Component diagram
+The component diagram here below 
+![component_diagram](https://user-images.githubusercontent.com/78590047/168242991-2aa84b73-a066-41ad-b9cf-307ef4492d22.png)
+
 
 # How this project works?
 
@@ -44,6 +48,8 @@ After this step it will be executed "check_hp" pddl_action, which will call id_h
 When all the places have been visited "check_hps" becomes true and the state_machine will ask for another round until there is a complete hypothesis.
 As already said, if a complete hypothesis is found the plan get deleted and the state_machine will know of this thanks to "hint_to_be_tested" rosparam. In this step the state_machine will modify the problem.pddl to force the robot to "test_hp", it will then go to the center of the map and will call "/oracle_solution" service to know if the hp found is the winner one.
 If it is not the winner id, then the state_machine will ask to continue finding ids.
+Here below there is a state machine diagram of what i have already explained.
+![state_machine](https://user-images.githubusercontent.com/78590047/168242897-da5b19ce-decd-41fd-b79f-5cbcbb0fb3b0.png)
 
 # Topic explanation
 The following topics are created by me:
